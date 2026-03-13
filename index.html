@@ -66,42 +66,10 @@
   });
 
   var player = jwplayer("player");
-  var audioCtx = null;
-  var gainNode = null;
 
   player.on("play", function() {
     try { player.setCurrentAudioTrack(1); } catch(e) {}
   });
-
-  // AudioContext: se aplica una sola vez en ready y se mantiene estable
-  if (!isSmartTV) {
-    player.on("ready", function() {
-      var video = document.querySelector("#player video");
-      if (!video || video._boostApplied) return;
-      try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        var src = audioCtx.createMediaElementSource(video);
-        gainNode = audioCtx.createGain();
-        gainNode.gain.value = 2;
-        src.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        video._boostApplied = true;
-
-        // Reanudar contexto si el navegador lo suspende al cambiar volumen o quitar mute
-        player.on("volume", function() {
-          if (audioCtx && audioCtx.state === "suspended") {
-            audioCtx.resume();
-          }
-        });
-        player.on("mute", function(e) {
-          if (!e.mute && audioCtx && audioCtx.state === "suspended") {
-            audioCtx.resume();
-          }
-        });
-
-      } catch(e) { console.warn("Audio boost no disponible:", e); }
-    });
-  }
 
   if (isSmartTV) {
     player.on("ready", function() {
