@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="referrer" content="no-referrer">
+  <title>TNT Sports Premium</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #05081c; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
+    #player { width: 100%; max-width: 960px; }
+    .jw-progress { background-color: #56ff00 !important; }
+    .jw-text-live::before { background-color: red !important; }
+    .jw-reset-text { color: white !important; }
+    .jw-controlbar { background-color: #05081c !important; border-top: 1px solid #333; }
+    .jw-button-color { color: #ccc !important; }
+    .jw-button-color:hover { color: #fff !important; }
+    .ios-landscape {
+      transform: rotate(90deg);
+      transform-origin: center center;
+      width: 100vh !important;
+      height: 100vw !important;
+      position: fixed !important;
+      top: 0; left: 0;
+      background: #000;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+
+<div id="player"></div>
+
+<script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
+<script>jwplayer.key = "XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo";</script>
+
+<script>
+  var PROXY  = "https://cors-proxy.wangzhishi.net/";
+  var STREAM = "https://cdn02.gigared.com.ar/live/eds/TNT_Sports_Premium/sa_live_dash/TNT_Sports_Premium.mpd";
+  var KEY_ID = "f26eb059fb0854f4d4218c895d7ae803";
+  var KEY    = "ffcb3fd4bd5657889215be4cb6275d1b";
+
+  var isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var isSmartTV = /SmartTV|Tizen|Web0S|SmartHub|Chromecast/i.test(navigator.userAgent);
+
+  jwplayer("player").setup({
+    playlist: [{
+      title: "TNT Sports Premium",
+      description: "EN VIVO",
+      sources: [{
+        file: PROXY + STREAM,
+        drm: { clearkey: { keyId: KEY_ID, key: KEY } }
+      }]
+    }],
+    autostart: true,
+    mute: false,
+    volume: 100,
+    width: "100%",
+    height: "100%",
+    stretching: "exactfit",
+    aspectratio: "16:9",
+    preload: "auto",
+    liveSyncDuration: 3,
+    live: { dvrSeekLimit: 3600, edgeMargin: 5 },
+    dash: { bufferLength: 1, maxBufferLength: 1 }
+  });
+
+  var player = jwplayer("player");
+
+  player.on("play", function() {
+    try { player.setCurrentAudioTrack(1); } catch(e) {}
+  });
+
+  if (!isSmartTV) {
+    player.on("play", function() {
+      var video = document.querySelector("#player video");
+      if (video && !video._boostApplied) {
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          var src = ctx.createMediaElementSource(video);
+          var gain = ctx.createGain();
+          gain.gain.value = 2;
+          src.connect(gain);
+          gain.connect(ctx.destination);
+          video.muted = false;
+          video.volume = 1.0;
+          video._boostApplied = true;
+        } catch(e) { console.warn("Audio boost no disponible:", e); }
+      }
+    });
+  }
+
+  if (isSmartTV) {
+    player.on("ready", function() {
+      var video = document.querySelector("#player video");
+      if (video) { video.muted = false; try { video.volume = 1.0; } catch(e){} }
+    });
+  }
+
+  player.on("fullscreen", function(e) {
+    var contenedor = document.getElementById("player");
+    if (!isIOS && screen.orientation) {
+      if (e.fullscreen) {
+        (async function tryLock() {
+          try { await screen.orientation.lock("landscape"); }
+          catch(err) { setTimeout(tryLock, 200); }
+        })();
+      } else {
+        try { screen.orientation.unlock(); } catch(err) {}
+      }
+    }
+    if (isIOS) {
+      if (e.fullscreen) contenedor.classList.add("ios-landscape");
+      else contenedor.classList.remove("ios-landscape");
+    }
+  });
+
+  player.on("buffer", function() {
+    try { player.setCurrentQuality(0); } catch(e) {}
+  });
+
+  player.on("ready", function() {
+    var lat = player.getLiveLatency ? player.getLiveLatency() : "N/A";
+    console.log("Latencia DVR:", lat, "s");
+  });
+</script>
+
+</body>
+</html>
