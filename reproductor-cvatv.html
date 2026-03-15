@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="referrer" content="no-referrer">
+<title>CVA TV</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0d14;
+  --surface: #0f1520;
+  --surface2: #161e30;
+  --border: #1c2840;
+  --accent: #e8312a;
+  --accent2: #ff6b63;
+  --text: #e8edf5;
+  --muted: #5a6a85;
+  --card-hover: #172035;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;overflow-x:hidden;}
+#app{display:flex;flex-direction:column;height:100vh;}
+
+/* Header */
+header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:50px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;letter-spacing:2px;color:#fff;}
+.logo span{color:var(--accent);}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+
+/* Main */
+main{display:flex;flex:1;overflow:hidden;}
+
+/* Sidebar */
+#sidebar{width:255px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.search-wrap{padding:10px 12px;border-bottom:1px solid var(--border);}
+#search{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 12px;color:var(--text);font-size:13px;outline:none;font-family:'Barlow',sans-serif;transition:border-color .2s;}
+#search:focus{border-color:var(--accent);}
+#search::placeholder{color:var(--muted);}
+.cat-tabs{display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.cat-btn{padding:3px 9px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;transition:all .2s;font-family:'Barlow',sans-serif;}
+.cat-btn:hover{color:var(--text);border-color:var(--accent);}
+.cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+#channel-list{overflow-y:auto;flex:1;}
+#channel-list::-webkit-scrollbar{width:3px;}
+#channel-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.ch-item{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid #0a1020;transition:background .15s;}
+.ch-item:hover{background:var(--card-hover);}
+.ch-item.active{background:#1a1030;border-left:3px solid var(--accent);}
+.ch-num{font-size:11px;color:var(--muted);min-width:20px;font-family:'Barlow Condensed',sans-serif;}
+.ch-icon{width:36px;height:36px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--accent2);flex-shrink:0;border:1px solid var(--border);text-align:center;line-height:1.2;padding:2px;}
+.ch-name{font-size:13px;font-weight:500;color:var(--text);}
+.ch-cat{font-size:10px;color:var(--muted);margin-top:1px;}
+
+/* Content */
+#content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#player-wrap{position:relative;background:#000;flex-shrink:0;}
+#player{width:100%;aspect-ratio:16/9;}
+
+/* JW overrides */
+.jw-progress{background-color:var(--accent) !important;}
+.jw-text-live::before{background-color:var(--accent) !important;}
+.jw-controlbar{background:rgba(10,13,20,.95) !important;border-top:1px solid var(--border) !important;}
+.jw-button-color{color:#6a7d9a !important;}
+.jw-reset-text{color:#fff !important;}
+
+/* Now playing */
+#now-playing{padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;}
+#np-icon{width:42px;height:42px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--accent2);border:1px solid var(--border);text-align:center;padding:2px;flex-shrink:0;}
+#np-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;line-height:1;}
+#np-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+.np-live{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-left:10px;}
+.np-live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite;}
+
+/* Status */
+#status-bar{padding:5px 20px;font-size:11px;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;min-height:26px;}
+.spin{display:inline-block;animation:spinr .7s linear infinite;}
+@keyframes spinr{to{transform:rotate(360deg)}}
+
+/* Empty */
+#empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:12px;}
+#empty .big-icon{font-size:52px;opacity:.25;}
+#empty p{font-size:14px;}
+
+/* iOS landscape */
+.ios-landscape{transform:rotate(90deg);transform-origin:center center;width:100vh !important;height:100vw !important;position:fixed !important;top:0;left:0;background:#000;z-index:9999;}
+
+@media(max-width:640px){#sidebar{width:195px;}}
+@media(max-width:480px){
+  main{flex-direction:column;}
+  #sidebar{width:100%;height:155px;border-right:none;border-bottom:1px solid var(--border);}
+  #channel-list{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;}
+  .ch-item{flex-direction:column;min-width:68px;text-align:center;padding:7px 5px;border-bottom:none;border-right:1px solid #0a1020;}
+  .ch-num,.ch-cat{display:none;}
+  .search-wrap,.cat-tabs{display:none;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">CVA<span>TV</span></div>
+    <div class="live-badge"><div class="live-dot"></div>EN VIVO</div>
+  </header>
+  <main>
+    <div id="sidebar">
+      <div class="search-wrap"><input id="search" type="text" placeholder="Buscar canal..." autocomplete="off"/></div>
+      <div class="cat-tabs" id="cat-tabs"></div>
+      <div id="channel-list"></div>
+    </div>
+    <div id="content">
+      <div id="player-wrap"><div id="player"></div></div>
+      <div id="now-playing" style="display:none;">
+        <div id="np-icon"></div>
+        <div>
+          <div id="np-name"></div>
+          <div id="np-meta">Cablevisión Argentina <span class="np-live"><div class="np-live-dot"></div>EN VIVO</span></div>
+        </div>
+      </div>
+      <div id="status-bar">Seleccioná un canal para comenzar</div>
+      <div id="empty"><div class="big-icon">📺</div><p>Elegí un canal de la lista</p></div>
+    </div>
+  </main>
+</div>
+
+<script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
+<script>jwplayer.key = "XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo";</script>
+<script>
+// CDN base
+var CDN_HOSTS = ["cdn","chromecast"];
+function rndHost(){ return CDN_HOSTS[Math.floor(Math.random()*CDN_HOSTS.length)]; }
+
+// Canales: { id (base64), nombre, cat, n (número CDN), k1, k2 }
+var CANALES = [
+  // ── DEPORTES ──
+  { b64:"VE5UX1Nwb3J0c19IRA",    nombre:"TNT Sports HD",       cat:"Deportes", n:6, k1:"bc80fa3da696e503f940fde5f681a1c5", k2:"ea46e4e9f1132e8dd71fb77f7d55058a" },
+  { b64:"Rm94X1Nwb3J0c19QcmVtaXVuX0hE", nombre:"Fox Sports Prem HD", cat:"Deportes", n:7, k1:"4c230dbc7f6a4bfa6ad0aa73ff792374", k2:"4186a7c2a15f590a9399886feaec4257" },
+  { b64:"Rm94U3BvcnRz",           nombre:"Fox Sports",           cat:"Deportes", n:6, k1:"cbc2a0c7a38df0aa3333cd71841d3b0d", k2:"aac61b730e2ac1df23f1e872e7541c1b" },
+  { b64:"Rm94U3BvcnRzMkhE",       nombre:"Fox Sports 2 HD",      cat:"Deportes", n:6, k1:"c98ddffc470fe449ae1a8d6492116976", k2:"5086d370e840010232cf4532b16e197f" },
+  { b64:"Rm94U3BvcnRzM0hE",       nombre:"Fox Sports 3 HD",      cat:"Deportes", n:6, k1:"55b47390cf9e4997dae6dac85e057875", k2:"fa39e855543c5d70f30600d59e5e4c1b" },
+  { b64:"RVNQTkhE",               nombre:"ESPN HD",               cat:"Deportes", n:7, k1:"cc8d44406ed6bf1898ad9f7a2d64f29e", k2:"fb85d059687ab0fc67805806204edbdf" },
+  { b64:"RVNQTjJfQXJn",           nombre:"ESPN 2",                cat:"Deportes", n:6, k1:"65a5bfa3c7a72dde60be9b0c7406c8fc", k2:"0b40ae9f78a7bac3b57ecbf72d3c081e" },
+  { b64:"RVNQTjM",                nombre:"ESPN 3",                cat:"Deportes", n:6, k1:"f4c9f97e2a36feab0e5077f2b44cbc4e", k2:"1743cd03dfe3736b2c95da91a783af38" },
+  { b64:"RVNQTjQ=",               nombre:"ESPN 4",                cat:"Deportes", n:7, k1:"24f2b3e741f0d9e9a8d516faff38bddc", k2:"bbd3fd02fb104e1463ac528a13f67e4a" },
+  { b64:"VHlDU3BvcnQ",            nombre:"TyC Sports",            cat:"Deportes", n:7, k1:"2b21c8fa9a329cce311a4c4a4aa996a1", k2:"cc23ea1fb32629f9e1f48c8deeae3e5b" },
+  { b64:"VHlDX0ludGVybmFjaW9uYWw=", nombre:"TyC Internacional",  cat:"Deportes", n:3, k1:"58e1ebe75d944f6a98ea67b1c7c0a572", k2:"1c311b069dbce31ce8e62a6e7e2433eb" },
+  { b64:"RGVwb3JUVkhE",           nombre:"DeporTV HD",            cat:"Deportes", n:6, k1:"f362097815892a4b83950f1d106ff0b2", k2:"4349e42e81c31a8389f4a42fcd298928" },
+  { b64:"TkJBX1RW",               nombre:"NBA TV",                cat:"Deportes", n:6, k1:"d0c38de3c9844e4e9f975dffb3eff8ad", k2:"141ca0fdf6ebadfa7107576b8e09e117" },
+  { b64:"RXZlbnRvczFIRA",         nombre:"Eventos 1 HD",          cat:"Deportes", n:3, k1:"5c86e237317c2231ac1bc130e995fad6", k2:"dcacf7b239ee03df3c69ca11dbcde4eb" },
+  { b64:"RXZlbnRvc18yX0hE",       nombre:"Eventos 2 HD",          cat:"Deportes", n:6, k1:"e54e9ea87a634658fbba0e380aa701a7", k2:"4e486d25d7d0e7d131743b285963c643" },
+  { b64:"QWR1bHRfU3dpbQ==",       nombre:"Adult Swim",            cat:"Deportes", n:3, k1:"9be1432e1e594c8d0648a44d3d9f0c46", k2:"8e6c785b14d973c504074b1920f11b15" },
+  // ── NOTICIAS ──
+  { b64:"VG9kb05vdGljaWFz",       nombre:"Todo Noticias",         cat:"Noticias", n:7, k1:"7ceb1cd0622cd7e88fcdc99fe3a55de6", k2:"951637093d41c7388a1ef3f620cfea21" },
+  { b64:"QzVO",                   nombre:"C5N",                   cat:"Noticias", n:7, k1:"050df5c6e78c774e78c3e99eef8a1b29", k2:"0e4141d6ab21a36cbc4da777ab3096d4" },
+  { b64:"TGFfTmFjaW9u",           nombre:"La Nación +",           cat:"Noticias", n:7, k1:"f4eade7bbc39b25402acfa301bbad04a", k2:"a74d1df4235a74878327aa8d53ff283c" },
+  { b64:"Q3JvbmljYVRW",           nombre:"Crónica TV",            cat:"Noticias", n:7, k1:"745e7abcc90d41ab706b2ac2f4371da3", k2:"50acd9d19d1361cb4a8a13a867bdc352" },
+  { b64:"QW1lcmljYTI0",           nombre:"América 24",            cat:"Noticias", n:7, k1:"3b1b027dd011af20fd9956c16dc084fb", k2:"45f75aacf06593c9b693fe427c67e5b8" },
+  { b64:"QkJDX1dvcmxkX05ld3M",    nombre:"BBC World News",        cat:"Noticias", n:6, k1:"019f72f2091d4cbea59ff8c85b117f86", k2:"a4eac51195506752f9f63ad24def9c37" },
+  { b64:"RXVyb25ld3M=",           nombre:"Euronews",              cat:"Noticias", n:6, k1:"d86b0f56d32f45adb0a6b4e488c8f0c2", k2:"e4f180b0e61be3e80ab602df5e56ff3f" },
+  { b64:"SW52ZXN0aWdhY2lvbl9QZXJpb2Rpc3RpY2E=", nombre:"IP Noticias", cat:"Noticias", n:7, k1:"5299f96f873aa0f0e47edc4e15784717", k2:"9d53176b0969492f2d93f1867be1dce1" },
+  { b64:"Rm94X05ld3M=",           nombre:"Fox News",              cat:"Noticias", n:6, k1:"3fe3f31a5e7b48a1b548e9364757ce66", k2:"32993fc281207fe915f6f1e990957868" },
+  { b64:"MjZfVFZfSEQ",            nombre:"26 TV HD",              cat:"Noticias", n:6, k1:"e32aaa4b67430b3b51be1efce5a74ac5", k2:"ad60c5e1d378a97271bf8688f094d092" },
+  // ── ABIERTA ──
+  { b64:"VGVsZWZlSEQ=",           nombre:"Telefe HD",             cat:"Abierta",  n:6, k1:"3cec1b1ea9799dda5596e64f37e5ed20", k2:"c69f3afde2085dcaaaddbf55246a0323" },
+  { b64:"Q2FuYWw3",               nombre:"El Siete",              cat:"Abierta",  n:6, k1:"cc8c82ac2ec7e9799527c29db7354e81", k2:"cc4aae173dd2ef17ae26be3f7ae87662" },
+  { b64:"QW1lcmljYVRW",           nombre:"América TV",            cat:"Abierta",  n:6, k1:"8ea235ce0826408b221c498115a9b62d", k2:"7aa9266ed91ea4510483370029dfcf45" },
+  { b64:"Q2FuYWw5",               nombre:"Canal 9",               cat:"Abierta",  n:6, k1:"24f4ff211136ae6512a1b552200db405", k2:"602122f8426c5c942b8c18d299cc6020" },
+  { b64:"R0VOX1RW",               nombre:"El Nueve (GEN)",        cat:"Abierta",  n:7, k1:"49eb924ba998ca7fbbaee30dcef1ecb4", k2:"6e131b04b2e87598fb588ac205673698" },
+  { b64:"QXJnZW50aW5pc2ltYQ",     nombre:"Argentinísima",         cat:"Abierta",  n:6, k1:"a6243f46366445ebbf3117ec27365481", k2:"81667cdc3bcf19a6a66c0919fa00a20b" },
+  { b64:"TWV0cm8",                nombre:"Metro",                 cat:"Abierta",  n:6, k1:"719aa3a5e270c7f69eba374ed80d7986", k2:"97ac59118cf4cf242e2c31e87cd38e1e" },
+  { b64:"RGlwdXRhZG9zX1RW",       nombre:"Diputados TV",          cat:"Abierta",  n:6, k1:"9666b195171442afd4551a8de01291a6", k2:"1c0061df9b4b098e40355167e97cfbf0" },
+  { b64:"VGVsZWZlX05ldXF1ZW4=",   nombre:"Telefe Neuquén",        cat:"Abierta",  n:4, k1:"55828b728b8affe6d1d57d050025645d", k2:"8ac11ed6d0ccaeac3f8218419f65bb94" },
+  { b64:"VGVsZWZlX1NhbHRh",       nombre:"Telefe Salta",          cat:"Abierta",  n:4, k1:"6c7a5de392f874308e4dd8f2837f1115", k2:"9ccf9ec6922c403d67d0df7952547581" },
+  { b64:"Q2FuYWxfNV9Sb3Nhcmlv",   nombre:"Canal 5 Rosario",       cat:"Abierta",  n:4, k1:"c61b5ac8e1664bf5b544e92ea2597e1c", k2:"938437ac25f0a18e04efc1a083489edc" },
+  { b64:"Q2FuYWxfOF9DQkE",        nombre:"Canal 8 CBA",           cat:"Abierta",  n:6, k1:"103ce214b4d04c8eb4dd43670e956dad", k2:"20e030576b8dc4df0d1c68e16af3bc0f" },
+  { b64:"Q2FuYWxfOF9UdWN1bWFu",   nombre:"Canal 8 Tucumán",       cat:"Abierta",  n:7, k1:"7760caa058b51b7cce151c0539fa4a8f", k2:"edd086c1011ed2c54cbe869d0e8d9289" },
+  { b64:"Q2FuYWxfMTJfQ0JB",       nombre:"Canal 12 CBA",          cat:"Abierta",  n:6, k1:"90422640d3e846159fa450f83870ed4a", k2:"abb3cd94aece1a462df25a8f21085cca" },
+  { b64:"Q2FuYWxfZGVfbGFfY2l1ZGFk", nombre:"Canal Ciudad",        cat:"Abierta",  n:6, k1:"5ee7842b3cf24d1dba088365fa5d0543", k2:"69cec006409823c06fbf2866a231b4f7" },
+  // ── CINE / SERIES ──
+  { b64:"VEVMRUZVVFVST19DNA==",    nombre:"Teletutor C4",          cat:"Cine",     n:4, k1:"5d2731cf8a59b73438ef59d88cd882bf", k2:"3f412fa6368b7db4903588de695377e1" },
+  { b64:"VE5UX0hEX0FyZw==",        nombre:"TNT HD",                cat:"Cine",     n:3, k1:"faad1722a575f4d9ec7b774db63c879c", k2:"cf0184830344ba36ad2ffef9dd2dd9d0" },
+  { b64:"VE5UU2VyaWVz",            nombre:"TNT Series",            cat:"Cine",     n:3, k1:"5c14d6aeb19bf113edf91a7b544253cb", k2:"8d776d6f9c5c840ebe88d767dd731692" },
+  { b64:"VEJT",                    nombre:"TBS (Novelas)",          cat:"Cine",     n:6, k1:"49a0179b034ae899cb67d8a5834181aa", k2:"486e2c6d69adea7e17f2960e8e366612" },
+  { b64:"VHJ1VFY=",                nombre:"TruTV",                  cat:"Cine",     n:6, k1:"7d0cecffe9c29734343cf9983978c1a1", k2:"f86b5ac05f2a2626b6c61bd4e13344d8" },
+  { b64:"U29ueUhE",                nombre:"Sony Channel HD",        cat:"Cine",     n:6, k1:"fd9619f9d7c2d5115a339941279e0b4b", k2:"bf55635e6591f905659fa27ab3ca2812" },
+  { b64:"VENN",                    nombre:"TCM",                    cat:"Cine",     n:6, k1:"a5f44a5e30714cf3bcee7c7f15a08b4e", k2:"c3c141ae941ab9750339c3af45a65ce2" },
+  { b64:"V2FybmVySEQ=",            nombre:"Warner HD",              cat:"Cine",     n:7, k1:"069bd3f0b6c279467e08549f17bf5bd0", k2:"5afa7e369a6de1093818a85af912a775" },
+  { b64:"QU1D",                    nombre:"AMC",                    cat:"Cine",     n:6, k1:"1fa6a86fd80b6d1425dde74482b5dc9c", k2:"744c3636d57a651ab444cf9fe5f95b33" },
+  { b64:"QUVIRA==",                nombre:"A&E",                    cat:"Cine",     n:7, k1:"db12035627a4b3d7198b761f36b4a290", k2:"80ca761a875992ac0e50b0851d5563fe" },
+  { b64:"UGFyYW1vdW50",            nombre:"Paramount",              cat:"Cine",     n:7, k1:"b85b710ecff3e38f31fc8e249b1c1cef", k2:"a1544c193dde6f8858c9358ee69a60a7" },
+  { b64:"Q2luZW1heA==",            nombre:"Cinemax",                cat:"Cine",     n:6, k1:"977928a92b82ba3781741a6470f8f45b", k2:"51f4e62827c128f7210b79a11587661a" },
+  { b64:"UXVpZXJvX0hE",            nombre:"Quiero HD",              cat:"Cine",     n:6, k1:"a354b0c82a3a720c4a6f52ed5a1190f4", k2:"45a76dcc84f058cfabc8b958d7303b28" },
+  { b64:"VGhlYXRlcl9IRA==",        nombre:"Theater HD",             cat:"Cine",     n:6, k1:"5279c05ea51c4dae8e7fa6be88448089", k2:"b28dfafba4b848dfd5d7c177ebf19108" },
+  { b64:"R2xpdHo=",                nombre:"Glitz",                  cat:"Cine",     n:6, k1:"f812ef81d6ce425a8db4012a1ef8b0c1", k2:"5c2b9791b1074727eb349588e32bdc0a" },
+  { b64:"QTNfQ2luZQ==",            nombre:"A3 Cine",                cat:"Cine",     n:7, k1:"d6ff881a6f07986a80d6ad6f041b57d4", k2:"b401c87c2ab11a1a488ee1c474b109ae" },
+  { b64:"QTNfU2VyaWVz",            nombre:"A3 Series",              cat:"Cine",     n:7, k1:"5e34e08ae5ae440f01a03e505dd24a57", k2:"ed30cc7f5040a75d73f619320249272b" },
+  { b64:"VVNBX05ldHdvcms=",        nombre:"USA Network",            cat:"Cine",     n:7, k1:"c754b522b3b87dc2ba2da3e35154ec14", k2:"141a51e9e83861ae99b4b217431710b3" },
+  { b64:"VW5pdmVyc2FsX0NoYW5uZWxfSEQ=", nombre:"Universal Channel HD", cat:"Cine", n:6, k1:"6cf9a13d6fd65a0f2e1cee3969aab9f5", k2:"ea61c3c1adee71b5c2e9744e41d4b75f" },
+  { b64:"U3R1ZGlvX1VuaXZlcnNhbA==", nombre:"Studio Universal",      cat:"Cine",     n:6, k1:"d9b541e3cd064d569843da42788d4263", k2:"bba5d26ad5051fb3f2cf7e3dd8a4a7d8" },
+  { b64:"VW5pdmVyc2FsX0NpbmVtYQ==", nombre:"Universal Cinema",      cat:"Cine",     n:6, k1:"f6ae2e17173055e4ca69dc18963406ae", k2:"5a955c29eb88a0b4c9a2538cc4b3aea2" },
+  { b64:"VW5pdmVyc2FsX0NvbWVkeQ==", nombre:"Universal Comedy",      cat:"Cine",     n:6, k1:"062c5d25105a3a935b67e36923c73f28", k2:"88c2d4cec420f18d2477152c66c7870d" },
+  { b64:"dW5pdmVyc2FsX0NyaW1l",    nombre:"Universal Crime",        cat:"Cine",     n:6, k1:"1efd7edf60e1514f775dd13d046ae708", k2:"c2ef1abbd945c62c11b1375eaaa50f0d" },
+  { b64:"VW5pdmVyc2FsX1ByZW1pZXJl", nombre:"Universal Premiere",    cat:"Cine",     n:6, k1:"0eb20b51ad13b58ad417f11318e588b3", k2:"ad5d29a33d73d21187157802de8e6097" },
+  { b64:"VW5pdmVyc2FsX1JlYWxpdHk=", nombre:"Universal Reality",     cat:"Cine",     n:6, k1:"cedd9c1a5c2ae43f80ee3197212016d6", k2:"bf47a3c39e164a97ea6adc4c8dd57435" },
+  { b64:"Q2luZWNhbmFsSEQ=",         nombre:"Cinecanal HD",           cat:"Cine",     n:6, k1:"6003e92dd0d9f548329015c9e15dd578", k2:"213cf85cb5f9fe569757004a77e05948" },
+  { b64:"RmlsbV9BcnRz",             nombre:"Film & Arts",            cat:"Cine",     n:6, k1:"91c540d350f34f5386f3f1c77f74001f", k2:"54ee72810551da0cba0c45a8df651962" },
+  { b64:"RWxfR2FyYWdl",             nombre:"El Garage",              cat:"Cine",     n:6, k1:"03d1dfb8df034d8b81e57753df00a36d", k2:"08d83660db4a73bb1d61d60b09df5f4d" },
+  { b64:"R29sZGVu",                 nombre:"Golden",                 cat:"Cine",     n:6, k1:"b7d085dbd4539afcc6a55445efb2b04e", k2:"0a55fbe044fed379d1632b589265b571" },
+  { b64:"RlhIRA==",                 nombre:"FX HD",                  cat:"Cine",     n:6, k1:"9ab9c42c713e0fb5517dc77cc19d6755", k2:"d8c271b82387e609b6c19e5e79240aff" },
+  { b64:"SVNBVA==",                 nombre:"ISAT",                   cat:"Cine",     n:6, k1:"db764164934a48749a7a01bd015694f3", k2:"512f3c8869af45e6e5dd1525b6a77867" },
+  { b64:"U3VuX0NoYW5uZWw=",         nombre:"Sun Channel",            cat:"Cine",     n:6, k1:"158177692aa3463eae5f4e1f72403e9c", k2:"1c6c026fba9cf7ecb576c7bedce0ead4" },
+  { b64:"QU1DX1Nlcmllcw==",         nombre:"AMC Series",             cat:"Cine",     n:6, k1:"10d3d4f33a6bad277accc2688c46b406", k2:"588fd56bcab1fcdb4f33b5c2f7018d29" },
+  { b64:"VGVsZW11bmRvX0hE",         nombre:"Telemundo HD",           cat:"Cine",     n:7, k1:"53d752e4649dadd808d913985f86ee77", k2:"d1fd24db1b61d634cabfc44538ce9b0e" },
+  { b64:"VGVsZW1heA",               nombre:"Telemax",                cat:"Cine",     n:6, k1:"e7ec364ad6854fedad797538cb58780d", k2:"57dfb3fca2ca35b37ff81c35595e9be8" },
+  { b64:"TmV0X1RW",                 nombre:"Net TV",                 cat:"Cine",     n:6, k1:"89d433166edd31d56df2a59df8ec6704", k2:"b2015faded0a456d10aa8db1b4cbac68" },
+  { b64:"RW5jdWVudHJv",             nombre:"Encuentro",              cat:"Cine",     n:6, k1:"ac3ae78beb64478ab390b4ad70e3e0c9", k2:"c7d669761c3516d852a0edf9e07c9198" },
+  // ── HBO ──
+  { b64:"SEJPSEQ=",                 nombre:"HBO HD",                 cat:"HBO",      n:4, k1:"5317283f4110fac3fb3a0becd9f648bc", k2:"0754a03c926b1247216e01d9dbcfac28" },
+  { b64:"SEJPXzI=",                 nombre:"HBO 2",                  cat:"HBO",      n:6, k1:"c90cc57ad2c436e5a77db2f8d9db2d85", k2:"04f6c73984bdcffd013050608497935d" },
+  { b64:"SEJPX1BsdXM=",             nombre:"HBO Plus",               cat:"HBO",      n:6, k1:"f0e7f7d458990edfab7b98b412564615", k2:"79205754b7f84a62661c2dbe9de5dd5d" },
+  { b64:"SEJPX0ZhbWlseQ==",         nombre:"HBO Family",             cat:"HBO",      n:6, k1:"535473132f68082160b489482ca35f8e", k2:"e90fd91fcd3fc809bed2b1c0d37f7297" },
+  { b64:"SEJPX0V4dHJlbWU=",         nombre:"HBO Xtreme",             cat:"HBO",      n:6, k1:"d504011bbef467c0de3a7534e302a6d4", k2:"334103e2abe16faa7f9ab2e3097c5a58" },
+  { b64:"SEJPX011bmRp",             nombre:"HBO Mundi",              cat:"HBO",      n:6, k1:"7821b2662148fe333d5191acbb8a5c1f", k2:"ae43f3e2545237ebda58b13813b5d328" },
+  { b64:"SEJPX1BPUA==",             nombre:"HBO Pop",                cat:"HBO",      n:7, k1:"f4e1ce5cef7e9a110fe968f8881b21fa", k2:"6bbe2062b150b11496cdd5fbdd9c89d6" },
+  { b64:"SEJPX1NpZ25hdHVyZQ==",     nombre:"HBO Signature",          cat:"HBO",      n:6, k1:"e866499fbc1149f49989672075aa3a68", k2:"d2dd5c95623c6343240981c2202fc311" },
+  // ── DOCUMENTALES ──
+  { b64:"TmF0R2VvSEQ=",             nombre:"Nat Geo HD",             cat:"Docs",     n:3, k1:"4be0c61ceddc62294cc9e23b627af53d", k2:"852c1935d11c3c53d0a1ceff3bb3bf16" },
+  { b64:"SGlzdG9yeUhE",             nombre:"History HD",             cat:"Docs",     n:7, k1:"e82318e518ba70cea3d7b37bef99e692", k2:"a05fcb634c071a514e3039e1c274b4db" },
+  { b64:"SGlzdG9yeV8y",             nombre:"History 2",              cat:"Docs",     n:6, k1:"ecbe97ec34784304b390a12ba3854ccf", k2:"5a0ee36ed9b8920cb19546fd92f2d415" },
+  { b64:"QW5pbWFsUGxhbmV0",         nombre:"Animal Planet",          cat:"Docs",     n:7, k1:"4146a8ecbb0540dc807c6389ee87e0bc", k2:"0c3cdc1b3e4617c57361265e9fa4c5bd" },
+  { b64:"RGlzY292ZXJ5SG9tZUhlYWx0aEhE", nombre:"Discovery H&H HD",  cat:"Docs",     n:3, k1:"9b0a76dd7a0df1e1b4320aeb1254d1a9", k2:"d011267775c38d6d2ab09b428c03d63f" },
+  { b64:"RGlzY292ZXJ5VHVyYm8=",     nombre:"Discovery Turbo",        cat:"Docs",     n:7, k1:"a611ddbf8c15fa617a0c391cb7b3e128", k2:"0cd1300baf8890380fd41124962195c4" },
+  { b64:"SUQ=",                     nombre:"Investigation Discovery", cat:"Docs",     n:7, k1:"0956caf2e2bd41f49fdcead7cc94fe24", k2:"640c49578073a911938617eb4e652d6c" },
+  { b64:"RGlzY292ZXJ5X1dvcmxkX0hE", nombre:"Discovery World HD",    cat:"Docs",     n:6, k1:"34ee94c2263345f7a3a590661264e490", k2:"56757d656a697ab7a2e5e083b5d21bb5" },
+  { b64:"RGlzY292ZXJ5X1NjaWVuY2U=", nombre:"Discovery Science",     cat:"Docs",     n:6, k1:"46ba409fb04e40fb86b466d97e3a9588", k2:"f129fb9b5d213e20e2abe529b8cf2597" },
+  { b64:"VExD",                     nombre:"TLC",                    cat:"Docs",     n:6, k1:"58761c7b2819491eb3a0d765842c341a", k2:"9dabc48f88bd7f266734e57501bd6f47" },
+  { b64:"RGlzY292ZXJ5SEQ=",         nombre:"Discovery HD",           cat:"Docs",     n:6, k1:"c283c84a7af0d7c8b9b612a8fb22a001", k2:"f45510c721eebd6eaa86a2e16ccbd77d" },
+  // ── ENTRETENIMIENTO ──
+  { b64:"Q29tZWR5Q2VudHJhbA",       nombre:"Comedy Central",         cat:"Entret.",  n:7, k1:"4013f784c5ef4318ad47024e61eb094e", k2:"bad433a547f97c7f65cda5e83b8dd416" },
+  { b64:"RV9FbnRlcnRhaW5tZW50X1RlbGV2aXNpb24=", nombre:"E! Entertainment", cat:"Entret.", n:6, k1:"5883553207f13e3dc8cecd1113d5ba68", k2:"45434d40636dfa0e5312b93218e02185" },
+  { b64:"QnJhdm9UVg==",             nombre:"Bravo TV",               cat:"Entret.",  n:6, k1:"ad7fbbec39cea4a5a63ac13d94da48d4", k2:"f71087b4dc211db079237c0fb783eb93" },
+  { b64:"RHJlYW13b3Jrcw==",         nombre:"Dreamworks",             cat:"Entret.",  n:7, k1:"7f30c43e47544412221fd64201d92f4b", k2:"f83d09d75a0946b1d71aa48c201b4d8b" },
+  { b64:"SG9sYV9UVg==",             nombre:"Hola TV",                cat:"Entret.",  n:7, k1:"5d759477f0ad1bdef2c6de09e7c275fd", k2:"82cc6eea185eecc934df95adfbbf9dbc" },
+  { b64:"VFY1X01vbmRl",             nombre:"TV5 Monde",              cat:"Entret.",  n:6, k1:"62034ff5988b4787b17cdf6f751a3142", k2:"b3938f0af28b4c0c082b0d4210e389a0" },
+  { b64:"VFZfRXNwYW5h",             nombre:"TV España",              cat:"Entret.",  n:6, k1:"53e0a3741e2e4ff5843f165b53309088", k2:"45095caabd9a359cd7ea3910d865d643" },
+  { b64:"QW50ZW5hXzM=",             nombre:"Antena 3",               cat:"Entret.",  n:6, k1:"1e1ad422a6714482b66fa702c16e50c6", k2:"4fdf28a0ab91356ca55a75f4e9bf8c92" },
+  { b64:"VHZfQ2hpbGU=",             nombre:"TV Chile",               cat:"Entret.",  n:6, k1:"c5d0d76e24844235988f9265619e5fec", k2:"446b71a6deb806c6f129e25de999d07c" },
+  { b64:"UGFyYWd1YXlfVFY=",         nombre:"Paraguay TV",            cat:"Entret.",  n:7, k1:"68a5bd6c58e6c05bacfd18d3feec31f2", k2:"ae23f8357512df2dfabcb8104b078182" },
+  { b64:"VW5pdmVyc2FsX0NpbmVtYQ==", nombre:"Universal Cinema",       cat:"Entret.",  n:6, k1:"f6ae2e17173055e4ca69dc18963406ae", k2:"5a955c29eb88a0b4c9a2538cc4b3aea2" },
+  { b64:"UkFJ",                     nombre:"RAI",                    cat:"Entret.",  n:6, k1:"d214547d7d9a4011a39a899ce6e70071", k2:"16c2ed0617cf1e123f3af6ea8875a82d" },
+  { b64:"RXVyb2NoYW5uZWw=",         nombre:"Eurochannel",            cat:"Entret.",  n:6, k1:"6f0fc214d9844a7590f0884d55b44c42", k2:"b2fe1bb5f9c79035301c328c1e93b0ee" },
+  // ── INFANTIL ──
+  { b64:"Q2FydG9vbk5ldHdvcms=",     nombre:"Cartoon Network",        cat:"Infantil", n:3, k1:"d7df56efaa36a71141d238854cc46d1d", k2:"8abb2ee9150d8b2af8ebec0de0f833c8" },
+  { b64:"Tmlja2Vsb2Rlb24=",         nombre:"Nickelodeon",            cat:"Infantil", n:3, k1:"61c18cefecc2d067beaa9ff181305345", k2:"38d6f650cbf9a38fd9f35c01f98e647a" },
+  { b64:"Tmlja19Kcg==",             nombre:"Nick Jr.",               cat:"Infantil", n:6, k1:"e824b2277a86fd6adfc40aa948e5064a", k2:"28da2dbbe8e1a1463bbb23895b922083" },
+  { b64:"RGlzbmV5SnI=",             nombre:"Disney Junior",          cat:"Infantil", n:7, k1:"bd29c4a538f28845ce33581111749428", k2:"46d9589f41a11c3637c07c604956deac" },
+  { b64:"RGlzY292ZXJ5X0tpZHM=",     nombre:"Discovery Kids",         cat:"Infantil", n:6, k1:"ffb2f0f63c23a3592d4653e938b9ca19", k2:"d3661ae881fc55fc7a15815cd439747b" },
+  { b64:"Qm9vbWVyYW5n",             nombre:"Boomerang",              cat:"Infantil", n:7, k1:"5792e613fceb699c79cbc0e75fe4cd37", k2:"a672793730476ed23e5c1bce2ff570c6" },
+  { b64:"UEFLQV9QQUtB",             nombre:"Paka Paka",              cat:"Infantil", n:6, k1:"334001b2f2644df9bdf35e92d2b89f8f", k2:"475ec87d86ed0636dbb6d6d9d4a43bb7" },
+  // ── MÚSICA ──
+  { b64:"TVRWX0hE",                 nombre:"MTV HD",                 cat:"Música",   n:6, k1:"0c9eb3ead38a122ac460ad96a8ebfd2e", k2:"66bfbfa4449eb8bc1bcf7577d5bffaad" },
+  { b64:"TVRWMDA=",                 nombre:"MTV 00s",                cat:"Música",   n:7, k1:"1f0c09ed9e5841cf867ba6eb3cdfd61d", k2:"802c89c6bae6a245aaafcf40c1986fc1" },
+  { b64:"TVRWX0hpdHM=",             nombre:"MTV Hits",               cat:"Música",   n:6, k1:"61008dfc867544cd872de99b1f2b82cf", k2:"716449756316b91c54803aaa22a2fbf0" },
+  { b64:"Q00=",                     nombre:"CM",                     cat:"Música",   n:6, k1:"682f36b5736f4560951ca14b80d29524", k2:"3accb729067a39b3b8143f1b447b9d25" },
+  { b64:"Rmxvd19NdXNpY19YUA==",     nombre:"Flow Music XP",          cat:"Música",   n:7, k1:"b2aae44a74144be8b2118e20d1412bab", k2:"8a7ae996d12d8d5d5637d1044f8e08b7" },
+  { b64:"Rmxvd19NdXNpY18x",         nombre:"Flow Music 1",           cat:"Música",   n:7, k1:"f34cd7709f093d23d4db009107d96862", k2:"d8a829138d970b45e867c9733a31b2f0" },
+  { b64:"Rmxvd19NdXNpY18y",         nombre:"Flow Music 2",           cat:"Música",   n:7, k1:"596b599580b39ae2f3c413f7eae36902", k2:"2d7e3d5d31f68690fd877a111f84e8e3" },
+  { b64:"Rmxvd19NdXNpY18z",         nombre:"Flow Music 3",           cat:"Música",   n:7, k1:"e078b15ed770ec71f803c0ecc43de033", k2:"7010bccda544f74d1b425c4cebd082d4" },
+  { b64:"VlRWX0hE",                 nombre:"VTV HD",                 cat:"Música",   n:6, k1:"b96960aa715a4e51b7e952e81c99ac8e", k2:"5bbffc680764dbd63d90b774b3aa0c0a" },
+  { b64:"U3lGeQ==",                 nombre:"SyFy",                   cat:"Música",   n:6, k1:"9cd99cbb466c42e5b33e7a2ef7e2c7df", k2:"18d9faccdaf2d15807d0a3f713e8b2a4" },
+  // ── ADULTOS ──
+  { b64:"UGxheWJveQ",               nombre:"Playboy TV",             cat:"Adultos",  n:6, k1:"8577d81eaf33436d9f1e482360685a7c", k2:"f608a0ac703cfaaf9442574d9a2b87fb" },
+  { b64:"U2V4dHJlbWU",              nombre:"Sextreme",               cat:"Adultos",  n:6, k1:"95bd64227acf458daf7886f803d0298e", k2:"79e28ee0ec58958bb666f9e53a0cd434" },
+  { b64:"VmVudXM=",                 nombre:"Venus",                  cat:"Adultos",  n:6, k1:"34237d2ae6684ee7a011f5b9c7c43e6d", k2:"05d973d987915120e567880f50a422af" },
+];
+
+// Deduplicate
+var seen = {};
+CANALES = CANALES.filter(function(c){ if(seen[c.b64]) return false; seen[c.b64]=1; return true; });
+
+var CATS = ["Todas","Deportes","Noticias","Abierta","Cine","HBO","Docs","Entret.","Infantil","Música","Adultos"];
+var activeCat = "Todas", activeSearch = "", currentCh = null, playerInst = null;
+
+function abbrev(n){ var w=n.split(" "); return w.length===1?n.substring(0,4).toUpperCase():w.slice(0,2).map(function(x){return x[0];}).join("").toUpperCase(); }
+
+function renderCats(){
+  var wrap=document.getElementById("cat-tabs"); wrap.innerHTML="";
+  CATS.forEach(function(c){
+    var b=document.createElement("button");
+    b.className="cat-btn"+(c===activeCat?" active":"");
+    b.textContent=c;
+    b.onclick=function(){activeCat=c;renderCats();renderList();};
+    wrap.appendChild(b);
+  });
+}
+
+function renderList(){
+  var list=document.getElementById("channel-list"); list.innerHTML="";
+  var q=activeSearch.toLowerCase();
+  var filtered=CANALES.filter(function(ch){
+    return (activeCat==="Todas"||ch.cat===activeCat)&&(!q||ch.nombre.toLowerCase().includes(q));
+  });
+  filtered.forEach(function(ch,i){
+    var el=document.createElement("div");
+    el.className="ch-item"+(currentCh&&currentCh.b64===ch.b64?" active":"");
+    el.innerHTML='<div class="ch-num">'+(i+1)+'</div><div class="ch-icon">'+abbrev(ch.nombre)+'</div><div><div class="ch-name">'+ch.nombre+'</div><div class="ch-cat">'+ch.cat+'</div></div>';
+    el.onclick=function(){sintonizar(ch);};
+    list.appendChild(el);
+  });
+}
+
+document.getElementById("search").addEventListener("input",function(){activeSearch=this.value;renderList();});
+
+function sintonizar(ch){
+  currentCh=ch; renderList();
+  document.getElementById("now-playing").style.display="flex";
+  document.getElementById("np-icon").textContent=abbrev(ch.nombre);
+  document.getElementById("np-name").textContent=ch.nombre;
+  document.getElementById("empty").style.display="none";
+  setStatus('<span class="spin">↻</span> Conectando con '+ch.nombre+'…');
+
+  var host=rndHost();
+  var canal=atob(ch.b64);
+  var url="https://"+host+".cvattv.com.ar/live/c"+ch.n+"eds/"+canal+"/SA_Live_dash_enc_C/"+canal+".mpd";
+
+  if(playerInst){try{playerInst.remove();}catch(e){}playerInst=null;}
+  document.getElementById("player").innerHTML="";
+
+  jwplayer("player").setup({
+    playlist:[{
+      title:ch.nombre, description:"EN VIVO",
+      sources:[{ file:url, type:"dash", drm:{ clearkey:{ keyId:ch.k1, key:ch.k2 } } }]
+    }],
+    autostart:true, mute:false, volume:100,
+    width:"100%", height:"100%", stretching:"exactfit", aspectratio:"16:9",
+    preload:"auto", cast:{}, sharing:{}
+  });
+
+  playerInst=jwplayer("player");
+
+  playerInst.on("play",function(){
+    setStatus("▶ Reproduciendo · "+ch.nombre+" · "+host.toUpperCase());
+    try{playerInst.setCurrentAudioTrack(1);}catch(e){}
+  });
+  playerInst.on("error",function(e){
+    // fallback: try other host
+    var altHost = host==="cdn"?"chromecast":"cdn";
+    var altUrl = "https://"+altHost+".cvattv.com.ar/live/c"+ch.n+"eds/"+canal+"/SA_Live_dash_enc_C/"+canal+".mpd";
+    setStatus('<span class="spin">↻</span> Reintentando con servidor alternativo…');
+    try{
+      playerInst.load([{sources:[{file:altUrl,type:"dash",drm:{clearkey:{keyId:ch.k1,key:ch.k2}}}]}]);
+      playerInst.play();
+    }catch(ex){ setStatus("✕ Error: no se pudo cargar "+ch.nombre); }
+  });
+  playerInst.on("buffer",function(){ setStatus('<span class="spin">↻</span> Cargando…'); });
+
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  playerInst.on("fullscreen",function(e){
+    var c=document.getElementById("player");
+    if(!isIOS&&screen.orientation){
+      if(e.fullscreen){(async function t(){try{await screen.orientation.lock("landscape");}catch(err){setTimeout(t,200);}})();}
+      else{try{screen.orientation.unlock();}catch(err){}}
+    }
+    if(isIOS){if(e.fullscreen)c.classList.add("ios-landscape");else c.classList.remove("ios-landscape");}
+  });
+}
+
+function setStatus(html){ document.getElementById("status-bar").innerHTML=html; }
+
+renderCats(); renderList();
+</script>
+</body>
+</html>
