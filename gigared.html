@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="referrer" content="no-referrer">
-<title>ChocoPopCable</title>
+<title>GigaTV</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -21,11 +21,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;overflow-x:hidden;}
-
-/* ── Layout ── */
 #app { display:flex; flex-direction:column; height:100vh; }
-
-/* ── Header ── */
 header {
   display:flex; align-items:center; justify-content:space-between;
   padding:0 20px; height:52px; flex-shrink:0;
@@ -40,11 +36,7 @@ header {
 }
 .live-dot { width:7px; height:7px; border-radius:50%; background:var(--live); animation:pulse 1.4s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
-
-/* ── Main ── */
 main { display:flex; flex:1; overflow:hidden; }
-
-/* ── Sidebar ── */
 #sidebar {
   width:260px; flex-shrink:0; background:var(--surface);
   border-right:1px solid var(--border);
@@ -59,7 +51,6 @@ main { display:flex; flex:1; overflow:hidden; }
 }
 #search:focus { border-color:var(--accent); }
 #search::placeholder { color:var(--muted); }
-
 .cat-tabs {
   display:flex; gap:4px; padding:8px 12px;
   border-bottom:1px solid var(--border); flex-wrap:wrap;
@@ -72,11 +63,9 @@ main { display:flex; flex:1; overflow:hidden; }
 }
 .cat-btn:hover { color:var(--text); border-color:var(--accent); }
 .cat-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-
 #channel-list { overflow-y:auto; flex:1; }
 #channel-list::-webkit-scrollbar { width:4px; }
 #channel-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
-
 .ch-item {
   display:flex; align-items:center; gap:10px; padding:10px 12px;
   cursor:pointer; border-bottom:1px solid #0d1526;
@@ -93,21 +82,15 @@ main { display:flex; flex:1; overflow:hidden; }
 }
 .ch-name { font-size:13px; font-weight:500; color:var(--text); }
 .ch-cat { font-size:10px; color:var(--muted); margin-top:1px; }
-
-/* ── Player area ── */
 #content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 #player-wrap { position:relative; background:#000; flex-shrink:0; }
 #player { width:100%; aspect-ratio:16/9; }
-
-/* JW overrides */
 .jw-progress { background-color:#3b82f6 !important; }
 .jw-text-live::before { background-color:var(--live) !important; }
 .jw-controlbar { background:rgba(8,12,24,.95) !important; border-top:1px solid var(--border) !important; }
 .jw-button-color { color:#94a3b8 !important; }
 .jw-button-color:hover, :not(.jw-flag-touch) .jw-button-color:hover { color:#fff !important; }
 .jw-reset-text { color:#fff !important; }
-
-/* ── Now playing bar ── */
 #now-playing {
   padding:14px 20px; background:var(--surface); border-bottom:1px solid var(--border);
   display:flex; align-items:center; gap:14px;
@@ -122,8 +105,6 @@ main { display:flex; flex:1; overflow:hidden; }
 #np-meta { font-size:12px; color:var(--muted); margin-top:3px; }
 .np-live { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--live); text-transform:uppercase; letter-spacing:.08em; margin-left:10px; }
 .np-live-dot { width:6px; height:6px; border-radius:50%; background:var(--live); animation:pulse 1.4s infinite; }
-
-/* ── Status ── */
 #status-bar {
   padding:6px 20px; font-size:11px; color:var(--muted);
   background:var(--bg); border-bottom:1px solid var(--border);
@@ -132,23 +113,20 @@ main { display:flex; flex:1; overflow:hidden; }
 }
 #status-bar .dot-loading { display:inline-block; animation:spin .8s linear infinite; }
 @keyframes spin { to{transform:rotate(360deg)} }
-
-/* ── Empty state ── */
 #empty {
   flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
   color:var(--muted); gap:12px;
 }
 #empty .big-icon { font-size:52px; opacity:.3; }
 #empty p { font-size:14px; }
-
-/* ── iOS landscape ── */
-.ios-landscape {
-  transform:rotate(90deg); transform-origin:center center;
-  width:100vh !important; height:100vw !important;
-  position:fixed !important; top:0; left:0; background:#000; z-index:9999;
+/* Retry button */
+#retry-btn {
+  display:none; margin-top:8px; padding:6px 16px;
+  background:var(--accent); color:#fff; border:none; border-radius:6px;
+  font-size:12px; font-family:'Barlow',sans-serif; cursor:pointer;
+  transition:opacity .2s;
 }
-
-/* ── Responsive ── */
+#retry-btn:hover { opacity:.85; }
 @media(max-width:640px){
   #sidebar { width:200px; }
   .cat-tabs { display:none; }
@@ -165,15 +143,11 @@ main { display:flex; flex:1; overflow:hidden; }
 </head>
 <body>
 <div id="app">
-
-  <!-- Header -->
   <header>
     <div class="logo">GIGA<span>TV</span></div>
     <div class="live-badge"><div class="live-dot"></div>EN VIVO</div>
   </header>
-
   <main>
-    <!-- Sidebar -->
     <div id="sidebar">
       <div class="search-wrap">
         <input id="search" type="text" placeholder="Buscar canal..." autocomplete="off"/>
@@ -181,8 +155,6 @@ main { display:flex; flex:1; overflow:hidden; }
       <div class="cat-tabs" id="cat-tabs"></div>
       <div id="channel-list"></div>
     </div>
-
-    <!-- Player + info -->
     <div id="content">
       <div id="player-wrap">
         <div id="player"></div>
@@ -209,9 +181,29 @@ main { display:flex; flex:1; overflow:hidden; }
 <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
 <script>jwplayer.key = "XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo";</script>
 <script>
-var PROXY = "https://cors-proxy.wangzhishi.net/";
-var CDN   = ["cdn02","cdn03"];
+// ── Proxies CORS en orden de prioridad ──────────────────────────────────────
+// Usamos una lista con fallback automático. Cada proxy tiene distinto formato de URL.
+var PROXIES = [
+  // Sin proxy: intento directo primero (funciona si Gigared habilita CORS o desde extensión)
+  { name:"directo", build: function(url){ return url; } },
+  // allorigins: devuelve JSON con .contents, necesita manejo especial → no sirve para video
+  // corsproxy.io: soporta streams, formato: https://corsproxy.io/?url=<encoded>
+  { name:"corsproxy.io", build: function(url){ return "https://corsproxy.io/?url=" + encodeURIComponent(url); } },
+  // cors.sh: requiere header, no sirve para JW directo
+  // thingproxy: simple prefijo
+  { name:"thingproxy", build: function(url){ return "https://thingproxy.freeboard.io/fetch/" + url; } },
+  // api.codetabs.com: ?quest=
+  { name:"codetabs", build: function(url){ return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url); } },
+];
+
+var proxyIndex = 0; // proxy actual
+var CDN = ["cdn02","cdn03"];
 function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+function buildUrl(ch, cdn) {
+  var raw = "https://" + cdn + ".gigared.com.ar/live/eds/" + ch.id + "/sa_live_dash/" + ch.id + ".mpd";
+  return PROXIES[proxyIndex].build(raw);
+}
 
 var CANALES = [
   // Noticias
@@ -308,12 +300,12 @@ var CANALES = [
   { id:"Unife",           nombre:"Unife",              cat:"Internac.",k1:"7213abb07b0ce71bedc6ba337e168fa4", k2:"317bc08ed843883a9397c61b22e1b60e" },
 ];
 
-// ── Categorías ──────────────────────────────────────────────────────────────
 var CATS = ["Todas","Deportes","Noticias","Abierta","Cine","Entretenimiento","Docs","Infantil","Lifestyle","Música","Internac."];
 var activeCat = "Todas";
 var activeSearch = "";
 var currentCh = null;
 var playerInst = null;
+var currentCDN = null;
 
 function abbrev(nombre) {
   var words = nombre.split(" ");
@@ -321,7 +313,6 @@ function abbrev(nombre) {
   return words.slice(0,2).map(function(w){ return w[0]; }).join("").toUpperCase();
 }
 
-// ── Render categorías ───────────────────────────────────────────────────────
 function renderCats() {
   var wrap = document.getElementById("cat-tabs");
   wrap.innerHTML = "";
@@ -334,7 +325,6 @@ function renderCats() {
   });
 }
 
-// ── Render lista ────────────────────────────────────────────────────────────
 function renderList() {
   var list = document.getElementById("channel-list");
   list.innerHTML = "";
@@ -351,36 +341,31 @@ function renderList() {
       '<div class="ch-num">'+(i+1)+'</div>'+
       '<div class="ch-icon">'+abbrev(ch.nombre)+'</div>'+
       '<div><div class="ch-name">'+ch.nombre+'</div><div class="ch-cat">'+ch.cat+'</div></div>';
-    el.onclick = function(){ sintonizar(ch); };
+    el.onclick = function(){ proxyIndex = 0; sintonizar(ch); };
     list.appendChild(el);
   });
 }
 
-// ── Search ──────────────────────────────────────────────────────────────────
 document.getElementById("search").addEventListener("input", function(){
   activeSearch = this.value;
   renderList();
 });
 
-// ── Sintonizar ──────────────────────────────────────────────────────────────
 function sintonizar(ch) {
   currentCh = ch;
+  currentCDN = rnd(CDN);
   renderList();
 
-  // Update now playing
   var np = document.getElementById("now-playing");
   np.style.display = "flex";
   document.getElementById("np-icon").textContent = abbrev(ch.nombre);
   document.getElementById("np-name").textContent = ch.nombre;
   document.getElementById("empty").style.display = "none";
 
-  setStatus('<span class="dot-loading">↻</span> Conectando con ' + ch.nombre + '…');
+  var pName = PROXIES[proxyIndex].name;
+  setStatus('<span class="dot-loading">↻</span> Conectando [' + pName + '] · ' + ch.nombre + '…');
 
-  var cdn  = rnd(CDN);
-  var url  = PROXY + "https://" + cdn + ".gigared.com.ar/live/eds/" + ch.id + "/sa_live_dash/" + ch.id + ".mpd";
-
-  var isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  var isSmartTV = /SmartTV|Tizen|Web0S|SmartHub|Chromecast/i.test(navigator.userAgent);
+  var url = buildUrl(ch, currentCDN);
 
   if (playerInst) {
     try { playerInst.remove(); } catch(e){}
@@ -413,29 +398,84 @@ function sintonizar(ch) {
   playerInst = jwplayer("player");
 
   playerInst.on("play", function(){
-    setStatus("▶ Reproduciendo · " + ch.nombre + " · " + cdn.toUpperCase());
+    setStatus("▶ Reproduciendo · " + ch.nombre + " · " + currentCDN.toUpperCase() + " [" + PROXIES[proxyIndex].name + "]");
     try { playerInst.setCurrentAudioTrack(1); } catch(e){}
   });
+
   playerInst.on("error", function(e){
-    setStatus("✕ Error al cargar " + ch.nombre + ". Intentá otro canal.");
-    console.error(e);
+    console.error("Error proxy=" + PROXIES[proxyIndex].name, e);
+    // Intentar siguiente proxy automáticamente
+    if (proxyIndex < PROXIES.length - 1) {
+      proxyIndex++;
+      var nextName = PROXIES[proxyIndex].name;
+      setStatus('<span class="dot-loading">↻</span> Reintentando con proxy ' + nextName + '…');
+      setTimeout(function(){ sintonizarConProxy(ch); }, 800);
+    } else {
+      // Agotamos todos los proxies, probar otro CDN
+      var otroCDN = CDN.filter(function(c){ return c !== currentCDN; })[0];
+      if (otroCDN) {
+        proxyIndex = 0;
+        currentCDN = otroCDN;
+        setStatus('<span class="dot-loading">↻</span> Probando CDN alternativo…');
+        setTimeout(function(){ sintonizarConProxy(ch); }, 800);
+      } else {
+        setStatus("✕ No se pudo conectar con " + ch.nombre + ". Verificá tu conexión.");
+      }
+    }
   });
+
   playerInst.on("buffer", function(){
     setStatus('<span class="dot-loading">↻</span> Cargando buffer…');
     try { playerInst.setCurrentQuality(0); } catch(e){}
   });
 
   playerInst.on("fullscreen", function(e){
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     var cont = document.getElementById("player");
     if (!isIOS && screen.orientation) {
       if (e.fullscreen) {
         (async function t(){ try { await screen.orientation.lock("landscape"); } catch(err){ setTimeout(t,200); } })();
       } else { try { screen.orientation.unlock(); } catch(err){} }
     }
-    if (isIOS) {
-      if (e.fullscreen) cont.classList.add("ios-landscape");
-      else cont.classList.remove("ios-landscape");
+  });
+}
+
+// Reintentar sin resetear el canal
+function sintonizarConProxy(ch) {
+  var url = buildUrl(ch, currentCDN);
+  try { playerInst.remove(); } catch(e){}
+  document.getElementById("player").innerHTML = "";
+
+  jwplayer("player").setup({
+    playlist: [{
+      title: ch.nombre,
+      sources: [{ file: url, drm: { clearkey: { keyId: ch.k1, key: ch.k2 } } }]
+    }],
+    autostart: true, mute: false, volume: 100,
+    width: "100%", height: "100%", stretching: "exactfit", aspectratio: "16:9",
+    preload: "auto", liveSyncDuration: 3,
+    live: { dvrSeekLimit: 3600, edgeMargin: 5 },
+    dash: { bufferLength: 1, maxBufferLength: 1 }
+  });
+  playerInst = jwplayer("player");
+
+  playerInst.on("play", function(){
+    setStatus("▶ Reproduciendo · " + ch.nombre + " · " + currentCDN.toUpperCase() + " [" + PROXIES[proxyIndex].name + "]");
+    try { playerInst.setCurrentAudioTrack(1); } catch(e){}
+  });
+  playerInst.on("error", function(e){
+    console.error("Error proxy=" + PROXIES[proxyIndex].name, e);
+    if (proxyIndex < PROXIES.length - 1) {
+      proxyIndex++;
+      setStatus('<span class="dot-loading">↻</span> Reintentando con proxy ' + PROXIES[proxyIndex].name + '…');
+      setTimeout(function(){ sintonizarConProxy(ch); }, 800);
+    } else {
+      setStatus("✕ Sin señal en " + ch.nombre + ". Probá con otro canal o revisá la conexión.");
     }
+  });
+  playerInst.on("buffer", function(){
+    setStatus('<span class="dot-loading">↻</span> Cargando buffer…');
+    try { playerInst.setCurrentQuality(0); } catch(e){}
   });
 }
 
@@ -443,7 +483,6 @@ function setStatus(html){
   document.getElementById("status-bar").innerHTML = html;
 }
 
-// ── Init ────────────────────────────────────────────────────────────────────
 renderCats();
 renderList();
 </script>
